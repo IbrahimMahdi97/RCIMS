@@ -1,0 +1,11 @@
+@RCIMS_HostAddress = http://localhost:5233
+
+GET {{RCIMS_HostAddress}}/todos/
+Accept: application/json
+
+###
+
+GET {{RCIMS_HostAddress}}/todos/1
+Accept: application/json
+
+###
