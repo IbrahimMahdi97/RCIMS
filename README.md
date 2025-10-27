@@ -43,44 +43,44 @@ Implements repositories using Dapper. SQL queries live in `Repository/Query/*Que
 The service layer implements business logic. Each service depends on `IRepositoryManager` and optional helpers like `FileStorageService`. Example: `ContractService` create contract by admin.
 ```
 public async Task<int> CreateByAdmin(ContractCreateByAdminDto contract, int userId)
+{
+    var asset = await _repository.Asset.GetById(contract.AssetId) ?? throw new AssetNotFoundException();
+    var plan = await _repository.Plan.GetById(contract.PlanId) ?? throw new PlanNotFoundException();
+    var assetId = await _repository.Asset.GetIdByUUID(contract.AssetId);
+    var planId = await _repository.Plan.GetIdByUUID(contract.PlanId);
+    var customerId = await _repository.User.GetIdByUUID(contract.UserId);
+    if (customerId <= 0) throw new UserNotFoundException(contract.UserId);
+    var contractNumber = await GetLastContractNumber() + 1;
+    int price = asset.ListPrice;
+    int subtotal = price - contract.DownPayment;
+    int discountamount = 0;
+    decimal discount = 0;
+    if (contract.Discount > 0)
     {
-        var asset = await _repository.Asset.GetById(contract.AssetId) ?? throw new AssetNotFoundException();
-        var plan = await _repository.Plan.GetById(contract.PlanId) ?? throw new PlanNotFoundException();
-        var assetId = await _repository.Asset.GetIdByUUID(contract.AssetId);
-        var planId = await _repository.Plan.GetIdByUUID(contract.PlanId);
-        var customerId = await _repository.User.GetIdByUUID(contract.UserId);
-        if (customerId <= 0) throw new UserNotFoundException(contract.UserId);
-        var contractNumber = await GetLastContractNumber() + 1;
-        int price = asset.ListPrice;
-        int subtotal = price - contract.DownPayment;
-        int discountamount = 0;
-        decimal discount = 0;
-        if (contract.Discount > 0)
-        {
-            discount = contract.Discount;
-            discountamount = Convert.ToInt32((price - contract.DownPayment) * discount);
-            subtotal = price - discountamount;
-        }
-        var contractCreate = new ContractForManipulationDto
-        {
-            ContractNumber = contractNumber.ToString(),
-            ContractDate = DateTime.Now,
-            Asset = assetId,
-            Plan = planId,
-            ContractStatus = 2,
-            ContractFor = customerId,
-            TotalAmount = price,
-            DownPayment = contract.DownPayment,
-            PaidAmount = contract.DownPayment,
-            Subtotal = subtotal,
-            GraceDays = plan.MaxAllow,
-            Discount = discount,
-            DiscountAmount = discountamount,
-            Description = contract.Description
-        };
-        var result = await Create(contractCreate, userId);
-        return result;
+        discount = contract.Discount;
+        discountamount = Convert.ToInt32((price - contract.DownPayment) * discount);
+        subtotal = price - discountamount;
     }
+    var contractCreate = new ContractForManipulationDto
+    {
+        ContractNumber = contractNumber.ToString(),
+        ContractDate = DateTime.Now,
+        Asset = assetId,
+        Plan = planId,
+        ContractStatus = 2,
+        ContractFor = customerId,
+        TotalAmount = price,
+        DownPayment = contract.DownPayment,
+        PaidAmount = contract.DownPayment,
+        Subtotal = subtotal,
+        GraceDays = plan.MaxAllow,
+        Discount = discount,
+        DiscountAmount = discountamount,
+        Description = contract.Description
+    };
+    var result = await Create(contractCreate, userId);
+    return result;
+}
 ```
 
 `ServiceManager` and `RepositoryManager` lazily instantiate services and repositories to centralize dependency management.
