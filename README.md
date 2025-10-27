@@ -61,7 +61,6 @@ public async Task<int> CreateByAdmin(ContractCreateByAdminDto contract, int user
             discountamount = Convert.ToInt32((price - contract.DownPayment) * discount);
             subtotal = price - discountamount;
         }
-
         var contractCreate = new ContractForManipulationDto
         {
             ContractNumber = contractNumber.ToString(),
