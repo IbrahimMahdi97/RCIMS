@@ -14,7 +14,6 @@ LoggerService/         – NLog logger implementation
 ```
 ## API Host
 `RCIMS/Program.cs` wires everything together. It sets up logging, DI, migrations, JWT auth, and registers controllers. The application uses a custom middleware to handle missing/expired tokens and an exception handler. Swagger is configured for API documentation.
-```
 
 ## Layers
 1. Entities
